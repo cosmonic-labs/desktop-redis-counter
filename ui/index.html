@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redis Counter · Cosmonic Desktop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #685BC7; --purple-dark: #5446b3; --space: #002E5D; --gunmetal: #253746;
+    --gray: #768692; --gainsboro: #D9E1E2; --yellow: #FFB600; --bg: #f4f7fa; --card: #fff;
+    --danger: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Work Sans", Arial, sans-serif; background: var(--bg); color: var(--gunmetal); }
+  header { background: var(--space); color: #fff; padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+  header .mark { width: 26px; height: 30px; color: var(--purple); filter: brightness(1.35); }
+  header .brand { font-weight: 600; letter-spacing: .02em; }
+  header .sep { opacity: .35; }
+  header .app { font-weight: 500; opacity: .9; }
+  header .pill { margin-left: auto; font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.12); }
+  header .pill.ok::before, header .pill.err::before { content: "●"; margin-right: 6px; }
+  header .pill.ok::before { color: #3ddc97; }
+  header .pill.err::before { color: var(--yellow); }
+  main { max-width: 880px; margin: 32px auto; padding: 0 20px; }
+  h1 { font-size: 26px; margin: 0 0 6px; color: var(--space); }
+  .lede { margin: 0 0 24px; color: var(--gray); line-height: 1.5; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; background: #eceff3; padding: 1px 5px; border-radius: 4px; }
+  form { display: flex; gap: 10px; margin-bottom: 24px; }
+  input { flex: 1; font: inherit; padding: 10px 12px; border: 1px solid var(--gainsboro); border-radius: 8px; background: #fff; }
+  input:focus { outline: 2px solid var(--purple); outline-offset: 1px; border-color: var(--purple); }
+  button { font: inherit; font-weight: 600; border: 0; border-radius: 8px; padding: 10px 16px; cursor: pointer; background: var(--purple); color: #fff; }
+  button:hover { background: var(--purple-dark); }
+  button.ghost { background: transparent; color: var(--gray); padding: 6px 8px; font-weight: 500; }
+  button.ghost:hover { color: var(--danger); background: #fbeceb; }
+  button.step { width: 40px; height: 40px; padding: 0; font-size: 20px; background: #efedfa; color: var(--purple); }
+  button.step:hover { background: var(--purple); color: #fff; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--gainsboro); border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(0,46,93,.05); }
+  .card .top { display: flex; align-items: center; justify-content: space-between; }
+  .card .name { font-weight: 600; color: var(--space); word-break: break-all; }
+  .card .value { font-size: 44px; font-weight: 700; color: var(--purple); margin: 10px 0 12px; font-variant-numeric: tabular-nums; }
+  .card .row { display: flex; gap: 8px; }
+  .empty { text-align: center; color: var(--gray); padding: 40px 0; border: 1px dashed var(--gainsboro); border-radius: 12px; background: #fff; }
+  .error { background: #fff4d6; border: 1px solid #ffd666; color: #6b4b00; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; display: none; }
+  footer { max-width: 880px; margin: 40px auto; padding: 0 20px; font-size: 13px; color: var(--gray); line-height: 1.6; }
+  footer a { color: var(--purple); }
+  @media (max-width: 560px) { header .app, header .sep { display: none; } }
+</style>
+</head>
+<body>
+<header>
+  <svg class="mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 81.97 93.65"><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1"><path fill="currentColor" d="M38.92,72.16c-4.7-12.57-10.87-18.69-23.5-23.39a2.08,2.08,0,0,1,0-3.9c12.63-4.69,18.8-10.82,23.5-23.39a2.06,2.06,0,0,1,3.92.12c3.8,12.69,8.19,21.32,37,21.87A2.07,2.07,0,0,0,82,41.41V27.12a7.41,7.41,0,0,0-3.67-6.41L44.72,1a7.4,7.4,0,0,0-7.47,0L3.67,20.71A7.45,7.45,0,0,0,0,27.13V66.56A7.43,7.43,0,0,0,3.68,73L37.26,92.64a7.36,7.36,0,0,0,7.45,0L78.3,73A7.45,7.45,0,0,0,82,66.56V52.26a2.08,2.08,0,0,0-2.11-2.08C51,50.73,46.63,59.36,42.84,72A2.06,2.06,0,0,1,38.92,72.16Z"></path></g></g></svg>
+  <span class="brand">Cosmonic</span><span class="sep">/</span><span class="app">Redis Counter</span>
+  <span id="status" class="pill">connecting…</span>
+</header>
+<main>
+  <h1>Counters in Redis</h1>
+  <p class="lede">A WebAssembly component on Cosmonic Desktop. It imports <code>wasi:keyvalue</code> as
+    <code>(implements cache)</code>; the host routes that to the Redis binding named <code>cache</code>.
+    The component never sees the Redis address or password.</p>
+  <div id="error" class="error" role="alert"></div>
+  <form id="add">
+    <input id="name" placeholder="New counter name, e.g. coffee" maxlength="64" pattern="[A-Za-z0-9._-]+" required aria-label="Counter name">
+    <button type="submit">Add counter</button>
+  </form>
+  <div id="counters" class="grid" aria-live="polite"></div>
+</main>
+<footer>
+  Data lives in Redis under the binding's prefix: try <code>redis-cli KEYS '*'</code>.
+  Restart the workload and the counts stay put. ·
+  <a href="https://github.com/cosmonic-labs/desktop-redis-counter">Source</a>
+</footer>
+<script>
+  const el = (id) => document.getElementById(id);
+  const showError = (msg) => { const e = el("error"); e.textContent = msg; e.style.display = msg ? "block" : "none"; };
+  const status = (ok, text) => { const s = el("status"); s.className = "pill " + (ok ? "ok" : "err"); s.textContent = text; };
+
+  async function api(method, path) {
+    const res = await fetch(path, { method });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || res.status + " " + res.statusText);
+    return body;
+  }
+
+  function render(counters) {
+    const root = el("counters");
+    root.replaceChildren();
+    if (!counters.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.style.gridColumn = "1 / -1";
+      empty.textContent = "No counters yet. Add one above.";
+      root.append(empty);
+      return;
+    }
+    for (const c of counters) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = '<div class="top"><span class="name"></span><button class="ghost" title="Delete">Delete</button></div>' +
+        '<div class="value"></div><div class="row"><button class="step" aria-label="Decrement">−</button><button class="step" aria-label="Increment">+</button></div>';
+      card.querySelector(".name").textContent = c.name;
+      card.querySelector(".value").textContent = c.value;
+      const [del, dec, inc] = card.querySelectorAll("button");
+      const enc = encodeURIComponent(c.name);
+      inc.onclick = () => act("POST", "/api/counters/" + enc + "/increment");
+      dec.onclick = () => act("POST", "/api/counters/" + enc + "/decrement");
+      del.onclick = () => act("DELETE", "/api/counters/" + enc);
+      root.append(card);
+    }
+  }
+
+  async function refresh() {
+    try {
+      const { counters } = await api("GET", "/api/counters");
+      render(counters);
+      status(true, "Redis: connected");
+      showError("");
+    } catch (e) {
+      status(false, "Redis: unavailable");
+      showError(e.message);
+    }
+  }
+
+  async function act(method, path) {
+    try { await api(method, path); } catch (e) { showError(e.message); }
+    refresh();
+  }
+
+  el("add").onsubmit = (ev) => {
+    ev.preventDefault();
+    const name = el("name").value.trim();
+    if (!name) return;
+    el("name").value = "";
+    act("POST", "/api/counters/" + encodeURIComponent(name) + "/increment");
+  };
+
+  refresh();
+  setInterval(refresh, 5000);
+</script>
+</body>
+</html>

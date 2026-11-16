@@ -1,0 +1,19 @@
+[package]
+name = "desktop-redis-counter"
+description = "A Cosmonic Desktop sample: counters in Redis, through wasmCloud's keyvalue Redis backend"
+edition = "2021"
+version = "0.2.0"
+license = "Apache-2.0"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = "0.60.0"
+serde_json = "1"
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

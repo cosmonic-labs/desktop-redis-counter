@@ -1,0 +1,27 @@
+# Apply after adding a Redis binding named `cache` in Cosmonic Desktop
+# (Settings -> Built-in plugins -> Redis) and restarting the host.
+# Then open http://redis-counter.localhost:8200/
+apiVersion: runtime.wasmcloud.dev/v1alpha1
+kind: Workload
+metadata:
+  name: redis-counter
+  namespace: default
+  annotations:
+    # A locally built sample is unsigned.
+    desktop.cosmonic.com/unsafe-allow-unsigned: "true"
+spec:
+  components:
+    - name: redis-counter
+      image: oci.localhost:8200/apps/desktop-redis-counter:0.2.0
+  hostInterfaces:
+    - namespace: wasi
+      package: http
+      interfaces: [incoming-handler]
+      config:
+        host: redis-counter.localhost
+    # Only the binding's NAME. Where it connects, and with which password,
+    # belongs to the host's binding; a url here is refused.
+    - namespace: wasi
+      package: keyvalue
+      interfaces: [store]
+      name: cache

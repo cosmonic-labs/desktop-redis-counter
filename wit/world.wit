@@ -1,0 +1,9 @@
+package cosmonic-labs:desktop-redis-counter@0.2.0;
+
+// wasi:keyvalue/store imported under the `(implements cache)` label. Cosmonic
+// Desktop routes it to the Redis binding named `cache` (Settings -> Built-in
+// plugins -> Redis); the workload names the binding and nothing else.
+world redis-counter {
+    import cache: wasi:keyvalue/store@0.2.0-draft;
+    export wasi:http/incoming-handler@0.2.2;
+}
