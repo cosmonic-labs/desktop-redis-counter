@@ -4,7 +4,7 @@ A small WebAssembly component that keeps counters in **Redis**, using
 [wasmCloud's Redis keyvalue backend](https://wasmcloud.com/docs/kubernetes-operator/host-interface-configuration/)
 as configured in [Cosmonic Desktop](https://cosmonic.com).
 
-![Redis Counter](docs/screenshot.png)
+![Redis Counter running on Cosmonic Desktop](docs/redis-counter.png)
 
 The component imports `wasi:keyvalue/store` under the label `cache`:
 
